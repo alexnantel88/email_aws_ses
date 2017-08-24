@@ -20,17 +20,17 @@
 		}
 
 		public function send(){
-			
+
 			try {
-				
+
 				$from_email = Symphony::Configuration()->get('from_address', 'email_aws_ses');
 				$this->setSenderEmailAddress($from_email);
-				
+
 				$from_name = Symphony::Configuration()->get('from_name', 'email_aws_ses');
 				$this->setSenderName($from_name);
-				
+
 				$this->validate();
-				
+
 				// build from address
 				if (empty($from_name)) {
 					$from = $from_email;
@@ -38,7 +38,7 @@
 				else {
 					$from = $from_name . ' <' . $from_email . '>';
 				}
-				
+
 				// build to addresses
 				$to = array();
 				foreach($this->_recipients as $name => $address) {
@@ -49,7 +49,7 @@
 						$to[] = $name . ' <' . $address . '>';
 					}
 				}
-				
+
 				// build reply-to addresses
 				$reply_to = array();
 				if($this->_reply_to_email_address){
@@ -60,7 +60,7 @@
 						$reply_to[] = $this->_reply_to_email_address;
 					}
 				}
-				
+
 				// build extra headers
 				$cc = $bcc = array();
 				foreach($this->_header_fields as $name => $body) {
@@ -74,14 +74,14 @@
 						//$headers[] = array($name, $body);
 					}
 				}
-				
+
 				// compile destination object
 				$destination = array(
 					'ToAddresses' => $to
 				);
 				if(count($cc) > 0) $destination['CcAddresses'] = $cc;
 				if(count($bcc) > 0) $destination['BccAddresses'] = $bcc;
-				
+
 				// compile message object
 				$message = array(
 					'Subject' => array('Data' => $this->_subject),
@@ -91,21 +91,21 @@
 				);
 				// only set HTML body if it exists
 				if(!empty($this->_text_html)) $message['Body']['Html'] = array('Data' => $this->_text_html);
-				
+
 				// compile extra options if they exist
 				$opt = array();
 				if(count($reply_to) > 0) $opt['ReplyToAddresses'] = $reply_to;
-				if(count($opt) == 0) $opt = NULL;
-				
+				if(count($opt) == 0) $opt = null;
+
 				// create new wrapper with API keys
 				$amazon_ses = new AmazonSES(
 					Symphony::Configuration()->get('aws_key', 'email_aws_ses'),
 					Symphony::Configuration()->get('aws_secret_key', 'email_aws_ses')
 				);
-				
+
 				// send
 				$response = $amazon_ses->send_email($from, $destination, $message, $opt);
-				
+
 				// handle bad responses (200 == OK)
 				if($response->status != 200) {
 					throw new EmailGatewayException(
@@ -117,14 +117,14 @@
 						)
 					);
 				}
-				
+
 			}
 			catch (Exception $e) {
 				throw new EmailGatewayException($e->getMessage());
 			}
-			
-			return TRUE;
-			
+
+			return true;
+
 		}
 
 		/**
@@ -144,7 +144,7 @@
 			$label = Widget::Label(__('From Name'));
 			$label->appendChild(Widget::Input('settings[email_aws_ses][from_name]', Symphony::Configuration()->get('from_name', 'email_aws_ses')));
 			$div->appendChild($label);
-			
+
 			$label = Widget::Label(__('From Address'));
 			$label->appendChild(Widget::Input('settings[email_aws_ses][from_address]', Symphony::Configuration()->get('from_address', 'email_aws_ses')));
 			$div->appendChild($label);

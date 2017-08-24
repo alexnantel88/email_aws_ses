@@ -7,7 +7,7 @@
 	 * @author Nick Dunn
 	 */
 	Class extension_email_aws_ses extends Extension{
-        
+
 		/**
 		 * Function to be executed on uninstallation
 		 */
@@ -18,7 +18,7 @@
 			 */
 			Symphony::Configuration()->remove('email_aws_ses');
 			Administration::instance()->saveConfig();
-			return TRUE;
+			return true;
 		}
 
 	}
